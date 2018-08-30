@@ -38,13 +38,15 @@ class Figure(object):
         return self._current_ax
 
     def add_plot(self, x, y, *, label=None) -> Figure:
-        if x is None or y is None:
-            raise RuntimeError
+        if x is None:
+            x = list(range(len(y)))
         length_check(x, y)
         self._current_ax.plot(to_numpy(x), to_numpy(y), label=label)
         return self
 
     def add_fill_plot(self, x, y, *, label=None, color="blue") -> Figure:
+        if x is None:
+            x = list(range(len(y)))
         length_check(x, y[0])
         x = to_numpy(x)
         y = to_numpy(y)
