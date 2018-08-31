@@ -53,7 +53,7 @@ class Figure(object):
 
     def add_fill_plot(self, x, y, *, label=None, color="blue") -> Figure:
         if x is None:
-            x = list(range(len(y)))
+            x = list(range(len(y[0])))
         length_check(x, y[0])
         x = to_numpy(x)
         y = to_numpy(y)
