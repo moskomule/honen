@@ -15,15 +15,21 @@ from .utils import to_numpy, length_check
 
 __all__ = ["Figure"]
 
+DEFAULT_TICK_PARAM = dict(direction="in",
+                          grid_alpha=0.5,
+                          grid_linestyle="--")
+
 
 class Figure(object):
-    def __init__(self, boxes: Tuple[int, int] = None, style='default', figsize=None):
+    def __init__(self, boxes: Tuple[int, int] = None, style: str = 'default', figsize: Tuple[int, int] = None):
         matplotlib.style.use(style)
         self.figure = plt.figure(figsize=figsize)
-        self._current_ax_position = 1
+        self._current_ax_position = 0
         self._boxes = (1, 1) if boxes is None else boxes
-        self._current_ax = self.figure.add_subplot(*self._boxes, 1)
+        self._current_ax: plt.Axes = None
         self._previous_axes = []
+        # initialize
+        self.next()
 
     def next(self) -> Figure:
         self._current_ax_position += 1
@@ -32,6 +38,7 @@ class Figure(object):
         else:
             self._previous_axes.append(self._current_ax)
             self._current_ax = self.figure.add_subplot(*self._boxes, self._current_ax_position)
+            self.set_tick_params("both", **DEFAULT_TICK_PARAM)
         return self
 
     def get_current_ax(self):
@@ -82,6 +89,10 @@ class Figure(object):
         self.figure.suptitle(title)
         return self
 
+    def add_grid(self) -> Figure:
+        self._current_ax.grid()
+        return self
+
     def save(self, name, *, dpi=300) -> Figure:
         self.figure.savefig(name, dpi=dpi)
         return self
@@ -91,4 +102,19 @@ class Figure(object):
             self.figure.show()
         else:
             raise RuntimeWarning("Display unavailable")
+        return self
+
+    def set_tick_params(self, axis="both", **kwargs) -> Figure:
+        if axis not in ("both", "x", "y"):
+            raise RuntimeError
+        self._current_ax.tick_params(axis=axis, **kwargs)
+        return self
+
+    def set_limits(self, xlims: Tuple[int, int] = None, ylims: Tuple[int, int] = None) -> Figure:
+        self._current_ax.set_xlim(xlims)
+        self._current_ax.set_ylim(ylims)
+        return self
+
+    def tight_layout(self, pad=1.08, h_pad=None, w_pad=None) -> Figure:
+        self.figure.tight_layout(pad=pad, h_pad=h_pad, w_pad=w_pad)
         return self
