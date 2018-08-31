@@ -2,6 +2,12 @@ import numpy as np
 import torch
 
 
+def in_notebook():
+    import sys
+
+    return "ipykernel" in sys.modules
+
+
 def to_numpy(tensor) -> np.array:
     if isinstance(tensor, torch.Tensor):
         return tensor.to("cpu").numpy()

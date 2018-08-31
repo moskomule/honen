@@ -11,7 +11,7 @@ if os.getenv("DISPLAY") is None:
     DISPLAY_AVAILABLE = False
     matplotlib.use("Agg")
 
-from .utils import to_numpy, length_check
+from .utils import to_numpy, length_check, in_notebook
 
 __all__ = ["Figure"]
 
@@ -98,7 +98,9 @@ class Figure(object):
         return self
 
     def show(self) -> Figure:
-        if DISPLAY_AVAILABLE:
+        if in_notebook():
+            return self.figure
+        elif DISPLAY_AVAILABLE:
             self.figure.show()
         else:
             raise RuntimeWarning("Display unavailable")
