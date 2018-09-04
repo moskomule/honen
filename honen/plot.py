@@ -44,14 +44,14 @@ class Figure(object):
     def get_current_ax(self):
         return self._current_ax
 
-    def add_plot(self, x, y, *, label=None) -> Figure:
+    def add_plot(self, x, y, *, label=None, linestyle=None, color=None) -> Figure:
         if x is None:
             x = list(range(len(y)))
         length_check(x, y)
-        self._current_ax.plot(to_numpy(x), to_numpy(y), label=label)
+        self._current_ax.plot(to_numpy(x), to_numpy(y), label=label, linestyle=linestyle, color=color)
         return self
 
-    def add_fill_plot(self, x, y, *, label=None, color="blue") -> Figure:
+    def add_fill_plot(self, x, y, *, label=None, color="C0") -> Figure:
         if x is None:
             x = list(range(len(y[0])))
         length_check(x, y[0])
