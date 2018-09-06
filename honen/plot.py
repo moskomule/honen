@@ -81,12 +81,12 @@ class Figure(object):
         self.figure.legend(loc=position)
         return self
 
-    def add_box_title(self, title) -> Figure:
-        self._current_ax.set_title(title)
+    def add_box_title(self, title, fontsize=None) -> Figure:
+        self._current_ax.set_title(title, fontsize=fontsize)
         return self
 
-    def add_global_title(self, title) -> Figure:
-        self.figure.suptitle(title)
+    def add_global_title(self, title, fontsize=None) -> Figure:
+        self.figure.suptitle(title, fontsize=fontsize)
         return self
 
     def add_grid(self) -> Figure:
