@@ -51,7 +51,7 @@ class Figure(object):
         self._current_ax.plot(to_numpy(x), to_numpy(y), label=label, linestyle=linestyle, color=color)
         return self
 
-    def add_fill_plot(self, x, y, *, label=None, color="C0") -> Figure:
+    def add_fill_plot(self, x, y, *, label=None, color="C0", alpha=0.5) -> Figure:
         if x is None:
             x = list(range(len(y[0])))
         length_check(x, y[0])
@@ -62,23 +62,23 @@ class Figure(object):
         mean = y.mean(axis=0)
         std = y.std(axis=0)
         self._current_ax.plot(x, mean, label=label, color=color)
-        self._current_ax.fill_between(x, mean - std, mean + std, facecolor=color, alpha=0.5)
+        self._current_ax.fill_between(x, mean - std, mean + std, facecolor=color, alpha=alpha)
         return self
 
-    def add_xlabel(self, text) -> Figure:
-        self._current_ax.set_xlabel(text)
+    def add_xlabel(self, text, fontsize=None) -> Figure:
+        self._current_ax.set_xlabel(text, fontsize=fontsize)
         return self
 
-    def add_ylabel(self, text) -> Figure:
-        self._current_ax.set_ylabel(text)
+    def add_ylabel(self, text, fontsize=None) -> Figure:
+        self._current_ax.set_ylabel(text, fontsize=fontsize)
         return self
 
-    def add_box_legend(self, position=None) -> Figure:
-        self._current_ax.legend(loc=position)
+    def add_box_legend(self, position=None, fontsize=None) -> Figure:
+        self._current_ax.legend(loc=position, fontsize=fontsize)
         return self
 
-    def add_global_legend(self, position=None) -> Figure:
-        self.figure.legend(loc=position)
+    def add_global_legend(self, position=None, fontsize=None) -> Figure:
+        self.figure.legend(loc=position, fontsize=fontsize)
         return self
 
     def add_box_title(self, title, fontsize=None) -> Figure:
