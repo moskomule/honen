@@ -18,6 +18,7 @@ __all__ = ["Figure"]
 DEFAULT_TICK_PARAM = dict(direction="in",
                           grid_alpha=0.5,
                           grid_linestyle="--")
+INITIAL_BAR_DICT = dict(count=0, index=None, width=None)
 
 
 class Figure(object):
@@ -28,8 +29,12 @@ class Figure(object):
         self._boxes = (1, 1) if boxes is None else boxes
         self._current_ax: plt.Axes = None
         self._previous_axes = []
+        self._bar_dict = INITIAL_BAR_DICT
         # initialize
         self.next()
+
+    def _refresh(self):
+        self._bar_dict = INITIAL_BAR_DICT
 
     def next(self) -> Figure:
         self._current_ax_position += 1
@@ -37,6 +42,7 @@ class Figure(object):
             raise UserWarning("No more box!")
         else:
             self._previous_axes.append(self._current_ax)
+            self._refresh()
             self._current_ax = self.figure.add_subplot(*self._boxes, self._current_ax_position)
             self.set_tick_params("both", **DEFAULT_TICK_PARAM)
         return self
@@ -63,6 +69,36 @@ class Figure(object):
         std = y.std(axis=0)
         self._current_ax.plot(x, mean, label=label, color=color)
         self._current_ax.fill_between(x, mean - std, mean + std, facecolor=color, alpha=alpha)
+        return self
+
+    def prepare_bar(self, index, width) -> Figure:
+        self._bar_dict["index"] = to_numpy(index)
+        self._bar_dict["width"] = width
+        return self
+
+    def add_bar(self, y, *, label=None, alpha=0.6, color=None) -> Figure:
+        if self._bar_dict.get("index") is None or self._bar_dict.get("width") is None:
+            raise RuntimeError("call prepare_bar(index, width) before calling add_bar")
+        index = self._bar_dict["index"]
+        width = self._bar_dict["width"]
+        count = self._bar_dict["count"]
+        length_check(index, y)
+        y = to_numpy(y)
+        self._current_ax.bar(index + count * width, y, width, alpha=alpha, color=color, label=label)
+        return self
+
+    def add_err_bar(self, y, *, label=None, alpha=0.6, color=None, error_color="0.3") -> Figure:
+        if self._bar_dict.get("index") is None or self._bar_dict.get("width") is None:
+            raise RuntimeError("call prepare_bar(index, width) before calling add_bar")
+        index = self._bar_dict["index"]
+        width = self._bar_dict["width"]
+        count = self._bar_dict["count"]
+        length_check(index, y[0])
+        y = to_numpy(y)
+        mean = y.mean(axis=0)
+        std = y.std(axis=0)
+        self._current_ax.bar(index + count * width, mean, width, yerr=std, alpha=alpha, color=color, label=label,
+                             error_kw={'ecolor': error_color})
         return self
 
     def add_xlabel(self, text, fontsize=None) -> Figure:
@@ -119,4 +155,12 @@ class Figure(object):
 
     def tight_layout(self, pad=1.08, h_pad=None, w_pad=None) -> Figure:
         self.figure.tight_layout(pad=pad, h_pad=h_pad, w_pad=w_pad)
+        return self
+
+    def set_xticks(self, names, index=None) -> Figure:
+        if index is None:
+            index = list(range(len(names)))
+        length_check(names, index)
+        self._current_ax.set_xticks(index)
+        self._current_ax.set_xticklabels(names)
         return self
