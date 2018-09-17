@@ -29,12 +29,12 @@ class Figure(object):
         self._boxes = (1, 1) if boxes is None else boxes
         self._current_ax: plt.Axes = None
         self._previous_axes = []
-        self._bar_dict = INITIAL_BAR_DICT
+        self._bar_dict = INITIAL_BAR_DICT.copy()
         # initialize
         self.next()
 
     def _refresh(self):
-        self._bar_dict = INITIAL_BAR_DICT
+        self._bar_dict = INITIAL_BAR_DICT.copy()
 
     def next(self) -> Figure:
         self._current_ax_position += 1
@@ -71,8 +71,8 @@ class Figure(object):
         self._current_ax.fill_between(x, mean - std, mean + std, facecolor=color, alpha=alpha)
         return self
 
-    def prepare_bar(self, index, width) -> Figure:
-        self._bar_dict["index"] = to_numpy(index)
+    def prepare_bar(self, num_groups, width) -> Figure:
+        self._bar_dict["index"] = to_numpy(list(range(num_groups)))
         self._bar_dict["width"] = width
         return self
 
@@ -85,9 +85,11 @@ class Figure(object):
         length_check(index, y)
         y = to_numpy(y)
         self._current_ax.bar(index + count * width, y, width, alpha=alpha, color=color, label=label)
+        self._bar_dict["count"] += 1
         return self
 
     def add_err_bar(self, y, *, label=None, alpha=0.6, color=None, error_color="0.3") -> Figure:
+        y = y.T
         if self._bar_dict.get("index") is None or self._bar_dict.get("width") is None:
             raise RuntimeError("call prepare_bar(index, width) before calling add_bar")
         index = self._bar_dict["index"]
@@ -99,6 +101,7 @@ class Figure(object):
         std = y.std(axis=0)
         self._current_ax.bar(index + count * width, mean, width, yerr=std, alpha=alpha, color=color, label=label,
                              error_kw={'ecolor': error_color})
+        self._bar_dict["count"] += 1
         return self
 
     def add_xlabel(self, text, fontsize=None) -> Figure:
@@ -157,10 +160,10 @@ class Figure(object):
         self.figure.tight_layout(pad=pad, h_pad=h_pad, w_pad=w_pad)
         return self
 
-    def set_xticks(self, names, index=None) -> Figure:
+    def set_xticks(self, names, index=None, fontsize=None) -> Figure:
         if index is None:
             index = list(range(len(names)))
         length_check(names, index)
         self._current_ax.set_xticks(index)
-        self._current_ax.set_xticklabels(names)
+        self._current_ax.set_xticklabels(names, fontdict=dict(fontsize=fontsize))
         return self
