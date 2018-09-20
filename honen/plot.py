@@ -22,7 +22,8 @@ INITIAL_BAR_DICT = dict(count=0, index=None, width=None)
 
 
 class Figure(object):
-    def __init__(self, boxes: Tuple[int, int] = None, style: str = 'default', figsize: Tuple[int, int] = None):
+    def __init__(self, boxes: Tuple[int, int] = None, style: str = 'default', figsize: Tuple[int, int] = None,
+                 enable_tex_rendering=False):
         matplotlib.style.use(style)
         self.figure = plt.figure(figsize=figsize)
         self._current_ax_position = 0
@@ -31,6 +32,9 @@ class Figure(object):
         self._previous_axes = []
         self._bar_dict = INITIAL_BAR_DICT.copy()
         # initialize
+        if enable_tex_rendering:
+            matplotlib.rcParams['text.usetex'] = True
+            matplotlib.rcParams['text.latex.unicode'] = True
         self.next()
 
     def _refresh(self):
